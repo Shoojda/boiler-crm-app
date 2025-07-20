@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: boiler-crm-backend
+    env: node
+    buildCommand: \"npm install\"
+    startCommand: \"node server/app.js\"
+    plan: free
