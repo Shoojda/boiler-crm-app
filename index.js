@@ -1,13 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const routes = require('./server/routes/index'); // Make sure this file exists
+const routes = require('./server/routes/index'); // ← Make sure this file exists
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// All backend routes under /api
-app.use('/api', routes);
+app.use('/api', routes); // all routes will be under /api
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
