@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const routes = require('./routes/index'); // <- this should point to your router file
+const routes = require('./routes/index'); // this must exist
 
 const app = express();
 app.use(cors());
