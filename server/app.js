@@ -20,8 +20,15 @@ app.get('/contacts', (req, res) => {
 app.post('/contacts', (req, res) => {
   const { name, email, phone } = req.body;
 
+  // Basic validation
   if (!name || !email || !phone) {
-    return res.status(400).json({ error: 'All fields are required.' });
+    return res.status(400).json({ error: 'All fields (name, email, phone) are required.' });
+  }
+
+  // Check for duplicate email
+  const emailExists = contacts.some((c) => c.email === email);
+  if (emailExists) {
+    return res.status(409).json({ error: 'A contact with this email already exists.' });
   }
 
   const newContact = {
@@ -32,11 +39,5 @@ app.post('/contacts', (req, res) => {
   };
 
   contacts.push(newContact);
-  res.status(201).json(newContact);
-});
-
-// Server start
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  res.status(201).json({ message: 'Contact added successfully', contact: newContact });
 });
