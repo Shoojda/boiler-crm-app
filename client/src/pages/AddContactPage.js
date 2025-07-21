@@ -8,26 +8,31 @@ const AddContactPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus('Submitting...');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setStatus('Submitting...');
 
-    try {
-      const res = await fetch('https://boiler-crm-app.onrender.com/contacts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
+  try {
+    const res = await fetch('https://boiler-crm-app.onrender.com/contacts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    });
 
-      if (!res.ok) throw new Error('Failed to submit');
+    const result = await res.json();
 
-      setStatus('Contact added ✅');
-      setForm({ name: '', email: '', phone: '' });
-    } catch (err) {
-      console.error(err);
-      setStatus('Failed to add contact ❌');
+    if (!res.ok) {
+      throw new Error(result.error || 'Failed to submit');
     }
-  };
+
+    setStatus('✅ Contact added successfully');
+    setForm({ name: '', email: '', phone: '' });
+  } catch (err) {
+    console.error(err);
+    setStatus(`❌ ${err.message}`);
+  }
+};
+
 
   return (
     <div style={{ padding: '2rem', maxWidth: '600px' }}>
