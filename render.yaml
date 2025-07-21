@@ -1,7 +1,9 @@
 services:
   - type: web
-    name: boiler-crm-backend
+    name: boiler-crm-app
     env: node
-    buildCommand: \"npm install\"
-    startCommand: \"node server/app.js\"
-    plan: free
+    buildCommand: npm install
+    startCommand: node index.js   # <-- this is the fix
+    envVars:
+      - key: NODE_ENV
+        value: production
