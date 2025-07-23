@@ -2,12 +2,32 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 import cors from 'cors';
+import express from 'express';
+import cors from 'cors';
+import clientsRouter from './routes/clients.js';
 
 const app = express();
 
 app.use(cors({
   origin: 'https://mojklijent.web.app'
 }));
+
+
+
+const app = express();
+
+// ✅ FIX CORS HERE
+app.use(cors({
+  origin: ['https://mojklijent.web.app', 'http://localhost:3000']
+}));
+
+app.use(express.json());
+app.use('/api/clients', clientsRouter);
+
+// ✅ Make sure your server starts
+app.listen(10000, () => {
+  console.log('Server running on port 10000');
+});
 
 // Example GET endpoint
 router.get('/api/contacts', (req, res) => {
