@@ -12,9 +12,7 @@ const PORT = process.env.PORT || 3001;
 import cors from 'cors';
 
 app.use(cors({
-  origin: 'https://mojklijent.web.app', // ✅ allow only your Firebase frontend
-  methods: ['GET', 'POST'],
-  credentials: true
+  origin: 'https://mojklijent.web.app'
 }));
 
 app.use(express.json());
