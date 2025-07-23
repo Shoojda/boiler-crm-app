@@ -3,6 +3,13 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 dotenv.config();
 
+
+
+console.log('🔌 Connecting to MySQL with:');
+console.log('  Host:', process.env.DB_HOST);
+console.log('  User:', process.env.DB_USER);
+console.log('  Database:', process.env.DB_NAME);
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,

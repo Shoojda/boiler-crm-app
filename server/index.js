@@ -1,18 +1,20 @@
-// server/index.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import clientRoutes from './routes/clients.js';
+import clientsRouter from './routes/clients.js';
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const PORT = process.env.PORT || 3001;
+
+app.use(cors({
+  origin: '*' // or restrict to your frontend domain in production
+}));
 app.use(express.json());
 
-app.use('/api/clients', clientRoutes);
+app.use('/api/clients', clientsRouter);
 
-const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

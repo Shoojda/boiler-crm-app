@@ -1,38 +1,198 @@
-.App {
+/* App.css */
+
+:root {
+  --bg-color: #f6f8fa;
+  --text-color: #1a1a1a;
+  --card-bg: #ffffff;
+  --accent: #007bff;
+  --border-color: #ddd;
+}
+
+[data-theme='dark'] {
+  --bg-color: #1e1e1e;
+  --text-color: #f1f1f1;
+  --card-bg: #2c2c2c;
+  --accent: #4ea1ff;
+  --border-color: #444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Segoe UI', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+h1, h2 {
   text-align: center;
+  color: var(--text-color);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+ul {
+  list-style: none;
+  padding: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+li {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+input {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+button {
+  padding: 12px;
+  font-size: 1rem;
+  background-color: var(--accent);
   color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.App-link {
-  color: #61dafb;
+button:hover {
+  background-color: #0056b3;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  background: none;
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 16px;
+  cursor: pointer;
+  color: var(--text-color);
 }
+
+:root {
+  --bg-color: #f6f8fa;
+  --text-color: #1a1a1a;
+  --card-bg: #ffffff;
+  --accent: #007bff;
+  --border-color: #ddd;
+}
+
+[data-theme='dark'] {
+  --bg-color: #1e1e1e;
+  --text-color: #f1f1f1;
+  --card-bg: #2c2c2c;
+  --accent: #4ea1ff;
+  --border-color: #444;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Segoe UI', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+h1, h2 {
+  text-align: center;
+  color: var(--text-color);
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+input, textarea {
+  flex: 1 1 45%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+  flex: 1 1 100%;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+button {
+  padding: 12px 20px;
+  font-size: 1rem;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  background: none;
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 16px;
+  cursor: pointer;
+  color: var(--text-color);
+}
+

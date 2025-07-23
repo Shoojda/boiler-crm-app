@@ -1,17 +1,55 @@
 const express = require('express');
-const router = express.Router();
-const db = require('../db');
+const mysql = require('mysql2');
+const cors = require('cors');
 
-// Example GET endpoint
-router.get('/api/contacts', (req, res) => {
-  db.query('SELECT * FROM contacts', (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Database error');
-    } else {
-      res.json(results);
-    }
-  });
+const app = express();
+const PORT = 3001;
+
+app.use(cors());
+app.use(express.json());
+
+// MySQL connection
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'your_password',
+  database: 'your_database_name'
 });
 
-module.exports = router;
+// POST /api/clients
+app.post('/api/clients', (req, res) => {
+  const {
+    first_name,
+    last_name,
+    email,
+    phone,
+    address,
+    boiler_make,
+    boiler_model,
+    install_date,
+    next_service_date,
+    notes
+  } = req.body;
+
+  const query = `
+    INSERT INTO clients
+    (first_name, last_name, email, phone, address, boiler_make, boiler_model, install_date, next_service_date, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    query,
+    [first_name, last_name, email, phone, address, boiler_make, boiler_model, install_date, next_service_date, notes],
+    (err, result) => {
+      if (err) {
+        console.error('DB error:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.status(200).json({ success: true, id: result.insertId });
+    }
+  );
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+});
