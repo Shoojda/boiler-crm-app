@@ -1,13 +1,18 @@
-const express = require('express');
-const cors = require('cors');
-const routes = require('./routes/index'); // this must exist
+// server/index.js
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import clientRoutes from './routes/clients.js';
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use('/api', routes);
 
-const PORT = process.env.PORT || 3000;
+app.use('/api/clients', clientRoutes);
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
