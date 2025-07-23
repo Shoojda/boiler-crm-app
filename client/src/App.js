@@ -42,42 +42,42 @@ function App() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log('Submitting client:', formData); // Log before sending
+  e.preventDefault();
+  console.log('Submitting client:', formData);
 
-    try {
-      const response = await fetch('/api/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      console.log('Server response:', data); // Log after server replies
-
-      if (response.ok) {
-        alert('Client saved!');
-        setFormData({
-          first_name: '',
-          last_name: '',
-          email: '',
-          phone: '',
-          address: '',
-          boiler_make: '',
-          boiler_model: '',
-          install_date: '',
-          next_service_date: '',
-          notes: '',
+      try {
+        const response = await fetch(`${API}/api/clients`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
         });
-        fetchClients();
-      } else {
-        alert(`Error: ${data.error}`);
+
+        const data = await response.json();
+        console.log('Server response:', data);
+        
+        if (response.ok) {
+          alert('Client saved!');
+          setFormData({
+            first_name: '',
+            last_name: '',
+            email: '',
+            phone: '',
+            address: '',
+            boiler_make: '',
+            boiler_model: '',
+            install_date: '',
+            next_service_date: '',
+            notes: '',
+          });
+          fetchClients();
+        } else {
+          alert(`Error: ${data.error}`);
+        }
+      } catch (err) {
+        console.error('Submit error:', err);
+        alert('Failed to save client');
       }
-    } catch (err) {
-      console.error('Submit error:', err);
-      alert('Failed to save client');
-    }
-  };
+    };
 
   return (
     <div className="container">
