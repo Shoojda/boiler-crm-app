@@ -3,8 +3,6 @@ import './App.css';
 
 function App() {
   const [theme, setTheme] = useState('light');
-  const API = process.env.REACT_APP_API_URL;
-    fetch(`${API}/api/clients`);
   const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({
     first_name: '',
@@ -19,6 +17,8 @@ function App() {
     notes: '',
   });
 
+  const API = process.env.REACT_APP_API_URL || 'https://boiler-crm-api.onrender.com';
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
@@ -29,7 +29,7 @@ function App() {
 
   const fetchClients = async () => {
     try {
-      const res = await fetch('https://boiler-crm-api.onrender.com/api/clients');
+      const res = await fetch(`${API}/api/clients`);
       const data = await res.json();
       setClients(data);
     } catch (err) {
@@ -42,42 +42,42 @@ function App() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  console.log('Submitting client:', formData);
+    e.preventDefault();
+    console.log('Submitting client:', formData);
 
-      try {
-        const response = await fetch(`${API}/api/clients`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+    try {
+      const response = await fetch(`${API}/api/clients`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      if (response.ok) {
+        alert('Client saved!');
+        setFormData({
+          first_name: '',
+          last_name: '',
+          email: '',
+          phone: '',
+          address: '',
+          boiler_make: '',
+          boiler_model: '',
+          install_date: '',
+          next_service_date: '',
+          notes: '',
         });
-
-        const data = await response.json();
-        console.log('Server response:', data);
-        
-        if (response.ok) {
-          alert('Client saved!');
-          setFormData({
-            first_name: '',
-            last_name: '',
-            email: '',
-            phone: '',
-            address: '',
-            boiler_make: '',
-            boiler_model: '',
-            install_date: '',
-            next_service_date: '',
-            notes: '',
-          });
-          fetchClients();
-        } else {
-          alert(`Error: ${data.error}`);
-        }
-      } catch (err) {
-        console.error('Submit error:', err);
-        alert('Failed to save client');
+        fetchClients();
+      } else {
+        alert(`Error: ${data.error}`);
       }
-    };
+    } catch (err) {
+      console.error('Submit error:', err);
+      alert('Failed to save client');
+    }
+  };
 
   return (
     <div className="container">
