@@ -1,51 +1,47 @@
 import express from 'express';
-import db from '../db.js';
+import db from '../db.js'; // using mysql2/promise
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  db.query('SELECT * FROM clients', (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Database error');
-    } else {
-      res.json(results);
-    }
-  });
+router.get('/', async (req, res) => {
+  try {
+    const [results] = await db.query('SELECT * FROM clients');
+    res.json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Database error');
+  }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const {
     first_name, last_name, email, phone,
     address, boiler_make, boiler_model,
     install_date, next_service_date, notes
   } = req.body;
 
-  const query = `
-    INSERT INTO clients (
-      first_name, last_name, email, phone,
-      address, boiler_make, boiler_model,
-      install_date, next_service_date,
-      service_history, notes
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+  try {
+    const [result] = await db.query(
+      `INSERT INTO clients (
+        first_name, last_name, email, phone,
+        address, boiler_make, boiler_model,
+        install_date, next_service_date,
+        service_history, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        first_name, last_name, email, phone,
+        address, boiler_make, boiler_model,
+        install_date, next_service_date,
+        null, // service_history placeholder
+        notes
+      ]
+    );
 
-  db.query(query, [
-    first_name, last_name, email, phone,
-    address, boiler_make, boiler_model,
-    install_date, next_service_date,
-    null, // service_history (placeholder)
-    notes
-  ], (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Database insert error' });
-    } else {
-      res.status(201).json({ id: results.insertId, ...req.body });
-    }
-  });
+    res.status(201).json({ id: result.insertId, ...req.body });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database insert error' });
+  }
 });
-
 
 export default router;
