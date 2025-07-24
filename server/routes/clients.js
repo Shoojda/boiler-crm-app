@@ -20,6 +20,11 @@ router.post('/', async (req, res) => {
     install_date, next_service_date, notes
   } = req.body;
 
+  const query = `
+    INSERT INTO clients (first_name, last_name, email, phone, address, boiler_make, boiler_model, install_date, next_service_date, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
   try {
     const [result] = await db.query(
       `INSERT INTO clients (
