@@ -1,12 +1,13 @@
-const express = require('express');
-const router = express.Router();
-const db = require('../db');
 import cors from 'cors';
 import express from 'express';
 import cors from 'cors';
 import clientsRouter from './routes/clients.js';
 
-const app = express();
+
+const express = require('express');
+const router = express.Router();
+const db = require('../db');
+
 
 app.use(cors({
   origin: 'https://mojklijent.web.app'
