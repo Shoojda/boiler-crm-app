@@ -22,14 +22,21 @@ router.post('/', (req, res) => {
   } = req.body;
 
   const query = `
-    INSERT INTO clients (first_name, last_name, email, phone, address, boiler_make, boiler_model, install_date, next_service_date, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO clients (
+      first_name, last_name, email, phone,
+      address, boiler_make, boiler_model,
+      install_date, next_service_date,
+      service_history, notes
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(query, [
     first_name, last_name, email, phone,
     address, boiler_make, boiler_model,
-    install_date, next_service_date, notes
+    install_date, next_service_date,
+    null, // service_history (placeholder)
+    notes
   ], (err, results) => {
     if (err) {
       console.error(err);
@@ -39,5 +46,6 @@ router.post('/', (req, res) => {
     }
   });
 });
+
 
 export default router;
