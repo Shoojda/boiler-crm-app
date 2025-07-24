@@ -9,6 +9,7 @@ const app = express();
 // ✅ Apply CORS before any routes
 app.use(cors({
   origin: ['https://mojklijent.web.app', 'http://localhost:3000'],
+  credentials: true,
   credentials: true
 }));
 
