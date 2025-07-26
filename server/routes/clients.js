@@ -91,9 +91,7 @@ router.put('/:id', async (req, res) => {
     install_date, next_service_date, notes
   } = req.body;
 
-  if (!user_id) {
-    return res.status(400).json({ error: 'Missing user_id' });
-  }
+  if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
 
   try {
     const [result] = await db.query(
@@ -105,7 +103,7 @@ router.put('/:id', async (req, res) => {
       [
         first_name, last_name, email, phone,
         address, boiler_make, boiler_model,
-        install_date, next_service_date, notes,
+        install_date || null, next_service_date || null, notes,
         id, user_id
       ]
     );
