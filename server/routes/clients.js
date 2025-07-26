@@ -81,11 +81,11 @@ router.get('/:id', async (req, res) => {
 });
 
 
-// ✅ PUT (update) specific client — secured by user_id
 router.put('/:id', async (req, res) => {
-  const clientId = req.params.id;
+  const { id } = req.params;
+  const { user_id } = req.query;
+
   const {
-    user_id,
     first_name, last_name, email, phone,
     address, boiler_make, boiler_model,
     install_date, next_service_date, notes
@@ -101,12 +101,12 @@ router.put('/:id', async (req, res) => {
         first_name = ?, last_name = ?, email = ?, phone = ?,
         address = ?, boiler_make = ?, boiler_model = ?,
         install_date = ?, next_service_date = ?, notes = ?
-       WHERE id = ? AND user_id = ? AND is_deleted = 0`,
+      WHERE id = ? AND user_id = ?`,
       [
         first_name, last_name, email, phone,
         address, boiler_make, boiler_model,
         install_date, next_service_date, notes,
-        clientId, user_id
+        id, user_id
       ]
     );
 
@@ -114,12 +114,13 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Client not found or not authorized' });
     }
 
-    res.json({ message: 'Client updated successfully' });
+    res.json({ message: 'Client updated' });
   } catch (err) {
-    console.error('Update failed:', err);
+    console.error(err);
     res.status(500).json({ error: 'Database update error' });
   }
 });
+
 
 // Soft-delete client
 router.delete('/:id', async (req, res) => {
