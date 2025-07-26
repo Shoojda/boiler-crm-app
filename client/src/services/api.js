@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL 'httpsboiler-crm-app.onrender.comapi',
+  baseURL: 'https://boiler-crm-app.onrender.com/api/contacts',
 });
 
 export default API;

@@ -5,7 +5,7 @@ const ContactsPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://boiler-crm-app.onrender.com/contacts')
+    fetch('https://boiler-crm-app.onrender.com/api/contacts')
       .then((res) => res.json())
       .then((data) => {
         setContacts(data);

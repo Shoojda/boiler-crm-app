@@ -18,7 +18,8 @@ function App() {
         {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
       </button>
 
-      <h1>🔥 Boiler CRM</h1>
+      <h1>MojKlijent</h1>
+
       <p style={{ textAlign: 'center', fontStyle: 'italic' }}>
         Current theme: <strong>{theme}</strong>
       </p>

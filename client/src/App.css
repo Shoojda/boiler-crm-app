@@ -1,5 +1,17 @@
 /* App.css */
 
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.app-logo {
+  height: 60px;
+  margin-right: 1rem;
+}
+
 :root {
   --bg-color: #f6f8fa;
   --text-color: #1a1a1a;
