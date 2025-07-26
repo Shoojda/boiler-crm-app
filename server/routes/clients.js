@@ -20,6 +20,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { user_id } = req.query;
+
+  if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
+
+  try {
+    const [results] = await db.query(
+      'SELECT * FROM clients WHERE id = ? AND user_id = ? AND is_deleted = 0',
+      [id, user_id]
+    );
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Client not found or not authorized' });
+    }
+
+    res.json(results[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+
 // ✅ POST new client
 router.post('/', async (req, res) => {
   const {
