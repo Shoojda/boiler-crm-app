@@ -96,4 +96,31 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// Soft-delete client
+router.delete('/:id', async (req, res) => {
+  const clientId = req.params.id;
+  const userId = req.query.user_id;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'Missing user_id' });
+  }
+
+  try {
+    const [result] = await db.query(
+      'UPDATE clients SET is_deleted = 1 WHERE id = ? AND user_id = ?',
+      [clientId, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Client not found or access denied' });
+    }
+
+    res.json({ success: true, message: 'Client deleted (soft-delete)' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database delete error' });
+  }
+});
+
+
 export default router;
