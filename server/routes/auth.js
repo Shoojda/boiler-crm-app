@@ -1,4 +1,3 @@
-// server/routes/auth.js
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -11,7 +10,7 @@ function generateUserCode(first, last) {
   return (first[0] + last).toLowerCase() + Math.floor(Math.random() * 1000);
 }
 
-// Signup route
+// ✅ Signup route
 router.post('/signup', async (req, res) => {
   const { email, password, first_name, last_name, role } = req.body;
 
@@ -23,8 +22,9 @@ router.post('/signup', async (req, res) => {
     const user_code = generateUserCode(first_name, last_name);
 
     await db.query(
-      'INSERT INTO users (email, password, first_name, last_name, user_code, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [email, hashed, first_name, last_name, user_code, role || 'admin']
+      `INSERT INTO users (email, password, first_name, last_name, user_code, role, is_active, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [email, hashed, first_name, last_name, user_code, role || 'admin', 1]
     );
 
     res.json({ message: 'User registered successfully' });
@@ -34,21 +34,27 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// Login route
+// ✅ Login route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [users] = await db.query(
+      'SELECT * FROM users WHERE email = ? AND is_active = 1',
+      [email]
+    );
     const user = users[0];
-    if (!user) return res.status(401).json({ message: 'Invalid email or password' });
+
+    if (!user) return res.status(401).json({ message: 'Invalid credentials or inactive user' });
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ message: 'Invalid email or password' });
+    if (!match) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
-    });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
     res.json({ token });
   } catch (err) {
