@@ -1,4 +1,3 @@
-// server/index.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -12,6 +11,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+console.log('🔌 Connecting to MySQL with:');
+console.log(`  Host: ${process.env.DB_HOST}`);
+console.log(`  User: ${process.env.DB_USER}`);
+console.log(`  Database: ${process.env.DB_NAME}`);
+
 // ✅ Security headers
 app.use(helmet());
 
@@ -21,23 +25,19 @@ app.use(cors({
   credentials: true
 }));
 
-// ✅ Parse JSON
+// ✅ JSON parser
 app.use(express.json());
 
-// ✅ API Routes
+// ✅ Routes
 app.use('/api/clients', clientsRouter);
 app.use('/api/contacts', contactsRouter);
 app.use('/api/auth', authRoutes);
 
-// ✅ Root endpoint
-app.get('/', (req, res) => {
-  res.send('🚀 MojKlijent API is running');
-});
+// ✅ Root ping
+app.get('/', (req, res) => res.send('🚀 MojKlijent API is running'));
 
 // ✅ 404 fallback
-app.use((req, res, next) => {
-  res.status(404).json({ message: 'API route not found' });
-});
+app.use((req, res) => res.status(404).json({ message: 'API route not found' }));
 
 // ✅ Error handler
 app.use((err, req, res, next) => {
@@ -45,7 +45,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal server error' });
 });
 
-// ✅ Start Server
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`✅ MojKlijent server running on port ${PORT}`);
 });

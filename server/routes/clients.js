@@ -1,22 +1,23 @@
-import express from 'express';
-import db from '../db.js';
-import { format } from 'date-fns';
+// server/routes/clients.js
+const express = require('express');
+const db = require('../db');
+const { format } = require('date-fns');
 const authenticateToken = require('../middleware/authMiddleware');
+
+const router = express.Router();
+
+// Helper function to format dates for MySQL
 const formatDate = (dateStr) => {
   if (!dateStr) return null;
   try {
     return format(new Date(dateStr), 'yyyy-MM-dd');
-  } catch (err) {
+  } catch {
     return null;
   }
 };
 
-
-
-const router = express.Router();
-
 // ✅ GET all active clients for a specific user
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   const userId = req.query.user_id;
   const search = req.query.search || '';
 
@@ -47,7 +48,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+// ✅ GET client by ID
+router.get('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { user_id } = req.query;
 
@@ -70,74 +72,24 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
-// ✅ POST new client
-router.post('/', async (req, res) => {
-  let {
-    user_id,
-    first_name, last_name, email, phone,
-    address, boiler_make, boiler_model,
-    install_date, next_service_date, notes
-  } = req.body;
-
-  // Format the dates to 'YYYY-MM-DD' for MySQL
-  install_date = formatDate(install_date);
-  next_service_date = formatDate(next_service_date);
-
-  try {
-    const [result] = await db.query(
-      `INSERT INTO clients (
-        user_id,
-        first_name, last_name, email, phone,
-        address, boiler_make, boiler_model,
-        install_date, next_service_date,
-        service_history, notes,
-        is_deleted
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        user_id,
-        first_name, last_name, email, phone,
-        address, boiler_make, boiler_model,
-        install_date, next_service_date,
-        null, notes,
-        0 // is_deleted = false
-      ]
-    );
-
-    res.status(201).json({ id: result.insertId, ...req.body });
-  } catch (err) {
-    console.error('POST /clients error:', err);
-    res.status(500).json({ error: 'Database insert error', details: err.message });
-  }
-});
-
-
-// Get a specific client by ID and user_id
-router.get('/search', async (req, res) => {
+// ✅ SEARCH clients
+router.get('/search', authenticateToken, async (req, res) => {
   const { user_id, query } = req.query;
-
-  if (!user_id || !query) {
-    return res.status(400).json({ error: 'Missing user_id or query' });
-  }
+  if (!user_id || !query) return res.status(400).json({ error: 'Missing user_id or query' });
 
   try {
-    const searchQuery = `
+    const likeQuery = `%${query}%`;
+    const [results] = await db.query(
+      `
       SELECT * FROM clients
       WHERE user_id = ? AND is_deleted = 0 AND (
         first_name LIKE ? OR last_name LIKE ? OR
         email LIKE ? OR phone LIKE ? OR
         boiler_make LIKE ? OR boiler_model LIKE ?
       )
-    `;
-
-    const likeQuery = `%${query}%`;
-
-    const [results] = await db.query(searchQuery, [
-      user_id,
-      likeQuery, likeQuery,
-      likeQuery, likeQuery,
-      likeQuery, likeQuery
-    ]);
+      `,
+      [user_id, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery]
+    );
 
     res.json(results);
   } catch (err) {
@@ -146,9 +98,46 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// ✅ CREATE new client
+router.post('/', authenticateToken, async (req, res) => {
+  let {
+    user_id,
+    first_name, last_name, email, phone,
+    address, boiler_make, boiler_model,
+    install_date, next_service_date, notes
+  } = req.body;
 
+  install_date = formatDate(install_date);
+  next_service_date = formatDate(next_service_date);
 
-router.put('/:id', async (req, res) => {
+  try {
+    const [result] = await db.query(
+      `
+      INSERT INTO clients (
+        user_id,
+        first_name, last_name, email, phone,
+        address, boiler_make, boiler_model,
+        install_date, next_service_date,
+        service_history, notes, is_deleted
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      `,
+      [
+        user_id, first_name, last_name, email, phone,
+        address, boiler_make, boiler_model,
+        install_date, next_service_date,
+        null, notes
+      ]
+    );
+
+    res.status(201).json({ id: result.insertId, ...req.body });
+  } catch (err) {
+    console.error('POST /clients error:', err);
+    res.status(500).json({ error: 'Database insert error' });
+  }
+});
+
+// ✅ UPDATE existing client
+router.put('/:id', authenticateToken, async (req, res) => {
   const {
     first_name, last_name, email, phone,
     address, boiler_make, boiler_model,
@@ -158,17 +147,17 @@ router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const userId = req.query.user_id;
 
-  if (!userId) {
-    return res.status(400).json({ error: 'Missing user_id' });
-  }
+  if (!userId) return res.status(400).json({ error: 'Missing user_id' });
 
   try {
     const [result] = await db.query(
-      `UPDATE clients SET
+      `
+      UPDATE clients SET
         first_name = ?, last_name = ?, email = ?, phone = ?,
         address = ?, boiler_make = ?, boiler_model = ?,
         install_date = ?, next_service_date = ?, notes = ?
-      WHERE id = ? AND user_id = ?`,
+      WHERE id = ? AND user_id = ?
+      `,
       [
         first_name, last_name, email, phone,
         address, boiler_make, boiler_model,
@@ -184,20 +173,16 @@ router.put('/:id', async (req, res) => {
     res.json({ message: 'Client updated successfully' });
   } catch (err) {
     console.error('PUT /clients/:id error:', err);
-    res.status(500).json({ error: 'Database update error', details: err.message });
+    res.status(500).json({ error: 'Database update error' });
   }
 });
 
-
-
-// Soft-delete client
-router.delete('/:id', async (req, res) => {
+// ✅ SOFT DELETE client
+router.delete('/:id', authenticateToken, async (req, res) => {
   const clientId = req.params.id;
   const userId = req.query.user_id;
 
-  if (!userId) {
-    return res.status(400).json({ error: 'Missing user_id' });
-  }
+  if (!userId) return res.status(400).json({ error: 'Missing user_id' });
 
   try {
     const [result] = await db.query(
@@ -209,7 +194,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Client not found or access denied' });
     }
 
-    res.json({ success: true, message: 'Client deleted (soft-delete)' });
+    res.json({ success: true, message: 'Client soft-deleted' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database delete error' });
@@ -217,4 +202,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
-
