@@ -34,7 +34,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// ✅ Login route
+// Login route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -44,11 +44,10 @@ router.post('/login', async (req, res) => {
       [email]
     );
     const user = users[0];
-
-    if (!user) return res.status(401).json({ message: 'Invalid credentials or inactive user' });
+    if (!user) return res.status(401).json({ message: 'Invalid email or password' });
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!match) return res.status(401).json({ message: 'Invalid email or password' });
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
@@ -56,11 +55,22 @@ router.post('/login', async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    res.json({ token });
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        user_code: user.user_code
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error during login' });
   }
 });
+
 
 module.exports = router;

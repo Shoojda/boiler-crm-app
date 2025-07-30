@@ -1,7 +1,7 @@
 import express from 'express';
 import db from '../db.js';
 import { format } from 'date-fns';
-
+const authenticateToken = require('../middleware/authMiddleware');
 const formatDate = (dateStr) => {
   if (!dateStr) return null;
   try {
@@ -216,5 +216,5 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+module.exports = router;
 
-export default router;
