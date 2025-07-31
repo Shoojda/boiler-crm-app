@@ -2,8 +2,12 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const db = require('../db'); // ✅ This must import the pool directly
+const db = require('../db');
 require('dotenv').config();
+
+// Debug
+console.log('[DEBUG] typeof db:', typeof db);
+console.log('[DEBUG] db keys:', Object.keys(db));
 
 // 🧠 Helper to generate user_code like "dsmith321"
 function generateUserCode(first, last) {
