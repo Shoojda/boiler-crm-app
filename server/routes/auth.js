@@ -43,28 +43,22 @@ router.post('/signup', async (req, res) => {
 });
 
 // ✅ Login Route
+// POST /login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Look up active user by email
     const [users] = await db.query(
       'SELECT * FROM users WHERE email = ? AND is_active = 1',
       [email]
     );
 
     const user = users[0];
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+    if (!user) return res.status(401).json({ message: 'Invalid email or password' });
 
-    // Compare hashed password
     const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+    if (!match) return res.status(401).json({ message: 'Invalid email or password' });
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
@@ -72,15 +66,20 @@ router.post('/login', async (req, res) => {
     );
 
     res.json({
-  token,
-  user: {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    first_name: user.first_name,
-    last_name: user.last_name
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        first_name: user.first_name,
+        last_name: user.last_name
+      }
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 
-
+// ✅ Final export
 module.exports = router;
