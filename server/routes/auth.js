@@ -9,6 +9,7 @@ require('dotenv').config();
 function generateUserCode(first, last) {
   return (first[0] + last).toLowerCase() + Math.floor(Math.random() * 1000);
 }
+console.log('db.query is a function:', typeof db.query === 'function');
 
 // ✅ Signup Route
 router.post('/signup', async (req, res) => {
