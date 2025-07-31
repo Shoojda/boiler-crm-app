@@ -2,14 +2,13 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const db = require('../db');
+const db = require('../db'); // ✅ This must import the pool directly
 require('dotenv').config();
 
 // 🧠 Helper to generate user_code like "dsmith321"
 function generateUserCode(first, last) {
   return (first[0] + last).toLowerCase() + Math.floor(Math.random() * 1000);
 }
-console.log('db.query is a function:', typeof db.query === 'function');
 
 // ✅ Signup Route
 router.post('/signup', async (req, res) => {
@@ -35,7 +34,7 @@ router.post('/signup', async (req, res) => {
       [email, hashed, first_name, last_name, user_code, role || 'admin']
     );
 
-    res.json({ message: 'User registered successfully' });
+    res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error('Signup error:', err);
     res.status(500).json({ message: 'Server error during signup' });
@@ -43,7 +42,6 @@ router.post('/signup', async (req, res) => {
 });
 
 // ✅ Login Route
-// POST /login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -54,10 +52,14 @@ router.post('/login', async (req, res) => {
     );
 
     const user = users[0];
-    if (!user) return res.status(401).json({ message: 'Invalid email or password' });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ message: 'Invalid email or password' });
+    if (!match) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
@@ -81,5 +83,4 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ✅ Final export
 module.exports = router;
