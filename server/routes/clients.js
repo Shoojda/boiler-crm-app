@@ -18,10 +18,8 @@ const formatDate = (dateStr) => {
 
 // ✅ GET all active clients for a specific user
 router.get('/', authenticateToken, async (req, res) => {
-  const userId = req.query.user_id;
+  const userId = req.user.user_id;
   const search = req.query.search || '';
-
-  if (!userId) return res.status(400).json({ error: 'Missing user_id' });
 
   try {
     const [results] = await db.query(
@@ -51,14 +49,12 @@ router.get('/', authenticateToken, async (req, res) => {
 // ✅ GET client by ID
 router.get('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const { user_id } = req.query;
-
-  if (!user_id) return res.status(400).json({ error: 'Missing user_id' });
+  const userId = req.user.user_id;
 
   try {
     const [results] = await db.query(
       'SELECT * FROM clients WHERE id = ? AND user_id = ? AND is_deleted = 0',
-      [id, user_id]
+      [id, userId]
     );
 
     if (results.length === 0) {
@@ -74,8 +70,10 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // ✅ SEARCH clients
 router.get('/search', authenticateToken, async (req, res) => {
-  const { user_id, query } = req.query;
-  if (!user_id || !query) return res.status(400).json({ error: 'Missing user_id or query' });
+  const userId = req.user.user_id;
+  const query = req.query.query;
+
+  if (!query) return res.status(400).json({ error: 'Missing query' });
 
   try {
     const likeQuery = `%${query}%`;
@@ -88,7 +86,7 @@ router.get('/search', authenticateToken, async (req, res) => {
         boiler_make LIKE ? OR boiler_model LIKE ?
       )
       `,
-      [user_id, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery]
+      [userId, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery]
     );
 
     res.json(results);
@@ -100,8 +98,8 @@ router.get('/search', authenticateToken, async (req, res) => {
 
 // ✅ CREATE new client
 router.post('/', authenticateToken, async (req, res) => {
+  const userId = req.user.user_id;
   let {
-    user_id,
     first_name, last_name, email, phone,
     address, boiler_make, boiler_model,
     install_date, next_service_date, notes
@@ -122,14 +120,14 @@ router.post('/', authenticateToken, async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
       `,
       [
-        user_id, first_name, last_name, email, phone,
+        userId, first_name, last_name, email, phone,
         address, boiler_make, boiler_model,
         install_date, next_service_date,
         null, notes
       ]
     );
 
-    res.status(201).json({ id: result.insertId, ...req.body });
+    res.status(201).json({ id: result.insertId, user_id: userId, ...req.body });
   } catch (err) {
     console.error('POST /clients error:', err);
     res.status(500).json({ error: 'Database insert error' });
@@ -145,9 +143,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
   } = req.body;
 
   const { id } = req.params;
-  const userId = req.query.user_id;
-
-  if (!userId) return res.status(400).json({ error: 'Missing user_id' });
+  const userId = req.user.user_id;
 
   try {
     const [result] = await db.query(
@@ -180,9 +176,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 // ✅ SOFT DELETE client
 router.delete('/:id', authenticateToken, async (req, res) => {
   const clientId = req.params.id;
-  const userId = req.query.user_id;
-
-  if (!userId) return res.status(400).json({ error: 'Missing user_id' });
+  const userId = req.user.user_id;
 
   try {
     const [result] = await db.query(
