@@ -1,10 +1,8 @@
-// server/routes/index.js
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// ✅ Now this route becomes available at: /api/contacts/
-router.get('/', async (req, res) => {
+router.get('/contacts', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM contacts');
     res.json(rows);
