@@ -2,9 +2,10 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { LanguageContext } from '../contexts/LanguageContext';
+import BackToHomeButton from '../components/BackToHomeButton';
 
 const AddClient = () => {
-  const { language, toggleLanguage } = useContext(LanguageContext);
+  const { language } = useContext(LanguageContext);
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -25,13 +26,11 @@ const AddClient = () => {
       title: 'Add New Client',
       submit: 'Save Client',
       back: '← Back to Clients',
-      toggleLang: '🌐 Српски',
     },
     sr: {
       title: 'Dodaj novog klijenta',
       submit: 'Sačuvaj klijenta',
       back: '← Nazad na klijente',
-      toggleLang: '🌐 English',
     },
   }[language];
 
@@ -41,21 +40,28 @@ const AddClient = () => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post('https://boiler-crm-app.onrender.com/api/clients', form);
+      const token = localStorage.getItem('token');
+
+      await axios.post('https://boiler-crm-app.onrender.com/api/clients', form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       alert(language === 'en' ? 'Client saved!' : 'Klijent sačuvan!');
       navigate('/clients');
     } catch (err) {
+      console.error(err);
       alert('Error saving client.');
     }
   };
 
-  return (
-    <div className="container">
-      <div className="top-right-buttons">
-        <button onClick={toggleLanguage} className="top-btn">{t.toggleLang}</button>
-      </div>
 
-      <h1 className="mb-4">{t.title}</h1>
+  return (
+    <div className="card">
+      <h1>{t.title}</h1>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '1rem' }}>
+        <BackToHomeButton />
+      </div>
 
       {Object.entries({
         first_name: 'First Name / Ime',
@@ -75,9 +81,11 @@ const AddClient = () => {
           value={form[key]}
           onChange={handleChange}
           placeholder={label}
+          type={key.includes('date') ? 'date' : 'text'}
           className="input"
         />
       ))}
+
 
       <button onClick={handleSubmit} className="btn-primary mt-4">
         {t.submit}

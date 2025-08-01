@@ -9,7 +9,8 @@ import ClientDetails from './pages/ClientDetails';
 import Automation from './pages/Automation';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import PrivateRoute from './components/PrivateRoute'; // ✅ Add this import
+import PrivateRoute from './components/PrivateRoute';
+import MainLayout from './layout/MainLayout'; // ✅ Add this
 import './App.css';
 
 function AppRouter() {
@@ -34,12 +35,15 @@ function AppRouter() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* 🔐 Protected Routes */}
+          {/* 🔐 Protected Routes with Layout */}
           <Route
             path="/"
             element={
               <PrivateRoute>
-                <HomePage toggleTheme={toggleTheme} theme={theme} />
+                <MainLayout toggleTheme={toggleTheme} theme={theme}>
+                  
+                  <HomePage />
+                </MainLayout>
               </PrivateRoute>
             }
           />
@@ -47,7 +51,9 @@ function AppRouter() {
             path="/add-client"
             element={
               <PrivateRoute>
-                <AddClient />
+                <MainLayout toggleTheme={toggleTheme} theme={theme}>
+                  <AddClient />
+                </MainLayout>
               </PrivateRoute>
             }
           />
@@ -55,7 +61,9 @@ function AppRouter() {
             path="/clients"
             element={
               <PrivateRoute>
-                <ClientList />
+                <MainLayout toggleTheme={toggleTheme} theme={theme}>
+                  <ClientList />
+                </MainLayout>
               </PrivateRoute>
             }
           />
@@ -63,7 +71,9 @@ function AppRouter() {
             path="/edit-client/:id"
             element={
               <PrivateRoute>
-                <EditClient />
+                <MainLayout toggleTheme={toggleTheme} theme={theme}>
+                  <EditClient />
+                </MainLayout>
               </PrivateRoute>
             }
           />
@@ -71,7 +81,9 @@ function AppRouter() {
             path="/client-details/:id"
             element={
               <PrivateRoute>
-                <ClientDetails />
+                <MainLayout toggleTheme={toggleTheme} theme={theme}>
+                  <ClientDetails />
+                </MainLayout>
               </PrivateRoute>
             }
           />
@@ -79,7 +91,9 @@ function AppRouter() {
             path="/automation"
             element={
               <PrivateRoute>
-                <Automation />
+                <MainLayout toggleTheme={toggleTheme} theme={theme}>
+                  <Automation />
+                </MainLayout>
               </PrivateRoute>
             }
           />

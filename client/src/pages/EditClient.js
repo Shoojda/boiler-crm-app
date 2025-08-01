@@ -56,9 +56,7 @@ const EditClient = () => {
               placeholder={field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
             />
           ))}
-          <button type="submit">Update Client</button>
         </form>
-        <LogoutButton />
 
       </div>
     </div>

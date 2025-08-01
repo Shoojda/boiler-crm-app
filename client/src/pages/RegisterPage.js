@@ -5,23 +5,27 @@ import { LanguageContext } from '../contexts/LanguageContext';
 
 
 const RegisterPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
-
-  const toggleTheme = () => {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const navigate = useNavigate();
+const [firstName, setFirstName] = useState('');
+const [lastName, setLastName] = useState('');
+const toggleTheme = () => {
+const current = document.documentElement.getAttribute('data-theme');
+const next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
   };
 
   const register = async () => {
     try {
-      await axios.post('https://boiler-crm-app.onrender.com/api/auth/register', {
+      await axios.post('https://boiler-crm-app.onrender.com/api/auth/signup', {
         email,
         password,
+        first_name: firstName,
+        last_name: lastName
       });
+
       alert('Registration successful! Please log in.');
       navigate('/login');
     } catch (err) {
@@ -49,6 +53,22 @@ const RegisterPage = () => {
           placeholder="Password"
           className="input"
         />
+
+        <input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="First Name"
+            className="input"
+        />
+            <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Last Name"
+            className="input"
+        />
+
 
         <button
           onClick={register}

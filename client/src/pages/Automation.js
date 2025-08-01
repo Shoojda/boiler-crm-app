@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
 import { LanguageContext } from '../contexts/LanguageContext';
 
-
 const Automation = () => {
-  const { language, toggleLanguage } = useContext(LanguageContext);
+  const { language } = useContext(LanguageContext);
 
   const t = {
     en: {
@@ -20,18 +19,12 @@ const Automation = () => {
 
   return (
     <div className="container">
-      <div className="top-right-buttons">
-        <button onClick={toggleLanguage} className="top-btn">
-          {language === 'en' ? '🌐 Српски' : '🌐 English'}
-        </button>
-      </div>
-
       <h1 className="mb-4">{t.title}</h1>
       <div className="card">
         <p>{t.desc}</p>
       </div>
 
-      <a href="/home" className="button mt-4">
+      <a href="/" className="button mt-4">
         {t.back}
       </a>
     </div>
