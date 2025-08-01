@@ -8,9 +8,7 @@ dotenv.config();
 const clientsRouter = require('./routes/clients');
 const contactsRouter = require('./routes/contacts');
 const authRoutes = require('./routes/auth');
-const contactsRouter = require('./routes/index'); // Or change the name if needed
-
-
+// const indexRoutes = require('./routes/index'); // Only needed if different route
 
 // ✅ Initialize express app
 const app = express();
@@ -40,7 +38,6 @@ app.use(helmet());
 app.use(express.json());
 
 // ✅ API Routes
-app.use('/api/contacts', contactsRouter);
 app.use('/api/clients', clientsRouter);
 app.use('/api/contacts', contactsRouter);
 app.use('/api/auth', authRoutes);
