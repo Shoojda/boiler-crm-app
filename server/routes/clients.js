@@ -45,29 +45,6 @@ router.get('/', authenticateToken, async (req, res) => {
     res.status(500).send('Database error');
   }
 });
-
-// ✅ GET client by ID
-router.get('/:id', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.user_id;
-
-  try {
-    const [results] = await db.query(
-      'SELECT * FROM clients WHERE id = ? AND user_id = ? AND is_deleted = 0',
-      [id, userId]
-    );
-
-    if (results.length === 0) {
-      return res.status(404).json({ error: 'Client not found or not authorized' });
-    }
-
-    res.json(results[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
 // ✅ SEARCH clients
 router.get('/search', authenticateToken, async (req, res) => {
   const userId = req.user.user_id;
@@ -93,6 +70,28 @@ router.get('/search', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('Search error:', err);
     res.status(500).json({ error: 'Database search error' });
+  }
+});
+
+// ✅ GET client by ID
+router.get('/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.user_id;
+
+  try {
+    const [results] = await db.query(
+      'SELECT * FROM clients WHERE id = ? AND user_id = ? AND is_deleted = 0',
+      [id, userId]
+    );
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Client not found or not authorized' });
+    }
+
+    res.json(results[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
   }
 });
 
