@@ -8,8 +8,8 @@ dotenv.config();
 // ✅ Import routes
 const clientsRouter = require('./routes/clients');
 const contactsRouter = require('./routes/contacts');
-const miscRouter = require('./routes/index'); // Used under /api/misc
 const authRoutes = require('./routes/auth');
+const miscRouter = require('./routes/misc'); // 👈 serves additional endpoints like /contacts
 
 // ✅ Initialize express app
 const app = express();
@@ -30,14 +30,14 @@ app.use(cors({
 }));
 
 app.use(helmet());
-app.use(express.json()); // Parse incoming JSON
-app.options('*', cors()); // Handle preflight
+app.use(express.json());
+app.options('*', cors()); // Handle CORS preflight
 
 // ✅ API Routes
 app.use('/api/clients', clientsRouter);
-app.use('/api/contacts', contactsRouter);
+app.use('/api/contacts', contactsRouter);       // 🔐 Protected contact endpoints
 app.use('/api/auth', authRoutes);
-app.use('/api/misc', miscRouter); // Avoids duplicate 'contactsRouter' reference
+app.use('/api/misc', miscRouter);               // 📦 Unauthenticated misc endpoints like /contacts
 
 // ✅ Root endpoint
 app.get('/', (req, res) => res.send('🚀 MojKlijent API is running'));
