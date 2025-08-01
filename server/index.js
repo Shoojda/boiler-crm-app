@@ -2,13 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
+
 dotenv.config();
 
 // ✅ Import routes
 const clientsRouter = require('./routes/clients');
 const contactsRouter = require('./routes/contacts');
+const miscRouter = require('./routes/index'); // Used under /api/misc
 const authRoutes = require('./routes/auth');
-// const indexRoutes = require('./routes/index'); // Only needed if different route
 
 // ✅ Initialize express app
 const app = express();
@@ -20,7 +21,7 @@ console.log(`  Host: ${process.env.DB_HOST}`);
 console.log(`  User: ${process.env.DB_USER}`);
 console.log(`  Database: ${process.env.DB_NAME}`);
 
-// ✅ CORS Setup
+// ✅ Middleware
 app.use(cors({
   origin: 'https://mojklijent.web.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -28,24 +29,20 @@ app.use(cors({
   credentials: true
 }));
 
-// ✅ Handle Preflight requests
-app.options('*', cors());
-
-// ✅ Security headers
 app.use(helmet());
-
-// ✅ Parse incoming JSON
-app.use(express.json());
+app.use(express.json()); // Parse incoming JSON
+app.options('*', cors()); // Handle preflight
 
 // ✅ API Routes
 app.use('/api/clients', clientsRouter);
 app.use('/api/contacts', contactsRouter);
 app.use('/api/auth', authRoutes);
+app.use('/api/misc', miscRouter); // Avoids duplicate 'contactsRouter' reference
 
-// ✅ Root check
+// ✅ Root endpoint
 app.get('/', (req, res) => res.send('🚀 MojKlijent API is running'));
 
-// ✅ 404 Not Found handler
+// ✅ 404 Not Found
 app.use((req, res) => {
   res.status(404).json({ message: 'API route not found' });
 });
