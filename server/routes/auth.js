@@ -2,12 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const db = require('../db');
+const db = require('../db'); // ✅ This must import the pool directly
 require('dotenv').config();
-
-// Debug
-console.log('[DEBUG] typeof db:', typeof db);
-console.log('[DEBUG] db keys:', Object.keys(db));
 
 // 🧠 Helper to generate user_code like "dsmith321"
 function generateUserCode(first, last) {
@@ -78,7 +74,8 @@ router.post('/login', async (req, res) => {
         email: user.email,
         role: user.role,
         first_name: user.first_name,
-        last_name: user.last_name
+        last_name: user.last_name,
+        user_code: user.user_code
       }
     });
   } catch (err) {
