@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
+require('dotenv').config();
+
 
 const clientsRouter = require('./routes/clients');
 const contactsRouter = require('./routes/contacts');
@@ -16,14 +18,20 @@ console.log(`  Host: ${process.env.DB_HOST}`);
 console.log(`  User: ${process.env.DB_USER}`);
 console.log(`  Database: ${process.env.DB_NAME}`);
 
-// ✅ Security headers
-app.use(helmet());
+
 
 // ✅ CORS
 app.use(cors({
-  origin: ['https://mojklijent.web.app', 'http://localhost:3000'],
+  origin: 'https://mojklijent.web.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+app.options('*', cors());
+
+// ✅ Security headers
+app.use(helmet());
 
 // ✅ JSON parser
 app.use(express.json());
