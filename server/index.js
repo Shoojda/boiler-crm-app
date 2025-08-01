@@ -31,31 +31,31 @@ app.use(cors({
 
 app.use(helmet());
 app.use(express.json());
-app.options('*', cors()); // Preflight support
+app.options('*', cors()); // Handle preflight requests
 
 // ✅ API Routes
-app.use('/api/clients', clientsRouter);     // e.g., /api/clients/:id
-app.use('/api/contacts', contactsRouter);   // e.g., /api/contacts?client_id=123
-app.use('/api/misc', miscRouter);           // e.g., /api/misc/contacts
-app.use('/api/auth', authRoutes);           // e.g., /api/auth/login
+app.use('/api/clients', clientsRouter);     // e.g. /api/clients/:id
+app.use('/api/contacts', contactsRouter);   // e.g. /api/contacts?client_id=123
+app.use('/api/misc', miscRouter);           // e.g. /api/misc/all-contacts
+app.use('/api/auth', authRoutes);           // e.g. /api/auth/login
 
-// ✅ Root endpoint
+// ✅ Root health check
 app.get('/', (req, res) => {
   res.send('🚀 MojKlijent API is running');
 });
 
-// ✅ 404 handler
+// ✅ 404 Handler
 app.use((req, res) => {
   res.status(404).json({ message: 'API route not found' });
 });
 
-// ✅ Global error handler
+// ✅ Global Error Handler
 app.use((err, req, res, next) => {
   console.error('❌ Internal Server Error:', err);
   res.status(500).json({ message: 'Internal server error' });
 });
 
-// ✅ Start server
+// ✅ Start the server
 app.listen(PORT, () => {
   console.log(`✅ MojKlijent server running on port ${PORT}`);
 });
