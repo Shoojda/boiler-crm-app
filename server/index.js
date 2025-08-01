@@ -1,4 +1,3 @@
-// server/index.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -9,7 +8,7 @@ dotenv.config();
 // ✅ Import routes
 const clientsRouter = require('./routes/clients');
 const contactsRouter = require('./routes/contacts');
-const miscRouter = require('./routes/misc');       // ✅ Misc (safe debug routes)
+const miscRouter = require('./routes/misc');
 const authRoutes = require('./routes/auth');
 
 // ✅ Initialize express app
@@ -31,19 +30,21 @@ app.use(cors({
 }));
 
 app.use(helmet());
-app.use(express.json()); // Parse incoming JSON
-app.options('*', cors()); // Handle preflight
+app.use(express.json());
+app.options('*', cors()); // Preflight support
 
 // ✅ API Routes
-app.use('/api/clients', clientsRouter);
-app.use('/api/contacts', contactsRouter);
-app.use('/api/auth', authRoutes);
-app.use('/api/misc', miscRouter); // Mounted as /api/misc/all-contacts
+app.use('/api/clients', clientsRouter);     // e.g., /api/clients/:id
+app.use('/api/contacts', contactsRouter);   // e.g., /api/contacts?client_id=123
+app.use('/api/misc', miscRouter);           // e.g., /api/misc/contacts
+app.use('/api/auth', authRoutes);           // e.g., /api/auth/login
 
 // ✅ Root endpoint
-app.get('/', (req, res) => res.send('🚀 MojKlijent API is running'));
+app.get('/', (req, res) => {
+  res.send('🚀 MojKlijent API is running');
+});
 
-// ✅ 404 Not Found
+// ✅ 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'API route not found' });
 });
