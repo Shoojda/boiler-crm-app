@@ -10,8 +10,8 @@ const db = require('./db'); // make sure this path is correct
 // 🔌 ROUTES
 const authRoutes = require('./routes/auth');
 const clientsRouter = require('./routes/clients');
-//const contactsRouter = require('./routes/contacts');
-const miscRouter = require('./routes/misc');
+const contactsRouter = require('./routes/contacts');
+//const miscRouter = require('./routes/misc');
 
 // 🌍 MIDDLEWARE
 app.use(cors({
