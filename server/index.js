@@ -1,101 +1,56 @@
-console.log('🚀 Server starting...');
-
-// server/routes/auth.js
-const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const db = require('./db');
+// server/index.js
 require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
 
-// 🔐 Helper to generate user_code
-function generateUserCode(first, last) {
-  return (first[0] + last).toLowerCase() + Math.floor(Math.random() * 1000);
-}
+const app = express();
+const db = require('./db'); // make sure this path is correct
 
-// 🔍 Validate input
-function validateSignupInput({ email, password, first_name, last_name }) {
-  return email && password && first_name && last_name;
-}
+// 🔌 ROUTES
+const authRoutes = require('./routes/auth');
+const clientsRouter = require('./routes/clients');
+const contactsRouter = require('./routes/contacts');
+const miscRouter = require('./routes/misc');
 
-// ✅ Signup Route
-router.post('/signup', async (req, res) => {
-  const { email, password, first_name, last_name, role } = req.body;
+// 🌍 MIDDLEWARE
+app.use(cors({
+  origin: 'https://mojklijent.web.app', // ✅ Your frontend origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
-  if (!validateSignupInput(req.body)) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
+app.use(helmet());
+app.use(express.json());
+app.options('*', cors()); // Handle preflight
 
-  try {
-    const [existing] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (existing.length > 0) {
-      return res.status(409).json({ message: 'Email already in use' });
-    }
+// 📦 API ROUTES
+app.use('/api/auth', authRoutes);
+app.use('/api/clients', clientsRouter);
+app.use('/api/contacts', contactsRouter);
+app.use('/api/misc', miscRouter);
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user_code = generateUserCode(first_name, last_name);
-
-    await db.query(
-      `INSERT INTO users (email, password, first_name, last_name, user_code, role, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, 1)`,
-      [email, hashed, first_name, last_name, user_code, role || 'admin']
-    );
-
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (err) {
-    console.error('❌ Signup error:', err);
-    res.status(500).json({ message: 'Internal server error during signup' });
-  }
+// 🧪 Root endpoint for testing
+app.get('/', (req, res) => {
+  res.send('✅ Backend is running');
 });
 
-// ✅ Login Route
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+// ✅ DB Connection Test
+db.query('SELECT 1')
+  .then(() => console.log('✅ DB connection OK'))
+  .catch(err => {
+    console.error('❌ DB connection failed:', err);
+    process.exit(1); // Exit on DB failure
+  });
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
-  }
-
-  try {
-    const [users] = await db.query(
-      'SELECT * FROM users WHERE email = ? AND is_active = 1',
-      [email]
-    );
-
-    const user = users[0];
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        user_code: user.user_code
-      }
-    });
-  } catch (err) {
-    console.error('❌ Login error:', err);
-    res.status(500).json({ message: 'Internal server error during login' });
-  }
+// 🚀 START SERVER
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server listening on port ${PORT}`);
 });
 
-
+// 🧯 Error Handling
 process.on('uncaughtException', (err) => {
   console.error('🔥 Uncaught Exception:', err);
 });
@@ -103,6 +58,3 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('🔥 Unhandled Rejection at:', promise, 'reason:', reason);
 });
-
-
-module.exports = router;
