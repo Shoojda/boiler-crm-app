@@ -1,7 +1,7 @@
 // server/routes/misc.js
 const express = require('express');
 const router = express.Router();
-const db = require('./db');
+const db = require('../db');
 
 // 🔄 Use a distinct route to avoid conflict with /contacts
 router.get('/all-contacts', async (req, res) => {
