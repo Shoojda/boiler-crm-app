@@ -1,61 +1,96 @@
+// server/routes/auth.js
 const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const helmet = require('helmet');
+const router = express.Router();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const db = require('../db');
+require('dotenv').config();
 
-dotenv.config();
+// 🔐 Helper to generate user_code
+function generateUserCode(first, last) {
+  return (first[0] + last).toLowerCase() + Math.floor(Math.random() * 1000);
+}
 
-// ✅ Import routes
-const clientsRouter = require('./routes/clients');
-const contactsRouter = require('./routes/contacts');
-const miscRouter = require('./routes/misc');
-const authRoutes = require('./routes/auth');
+// 🔍 Validate input
+function validateSignupInput({ email, password, first_name, last_name }) {
+  return email && password && first_name && last_name;
+}
 
-// ✅ Initialize express app
-const app = express();
-const PORT = process.env.PORT || 10000;
+// ✅ Signup Route
+router.post('/signup', async (req, res) => {
+  const { email, password, first_name, last_name, role } = req.body;
 
-// ✅ Debug MySQL connection details
-console.log('🔌 Connecting to MySQL with:');
-console.log(`  Host: ${process.env.DB_HOST}`);
-console.log(`  User: ${process.env.DB_USER}`);
-console.log(`  Database: ${process.env.DB_NAME}`);
+  if (!validateSignupInput(req.body)) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
 
-// ✅ Middleware
-app.use(cors({
-  origin: 'https://mojklijent.web.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+  try {
+    const [existing] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (existing.length > 0) {
+      return res.status(409).json({ message: 'Email already in use' });
+    }
 
-app.use(helmet());
-app.use(express.json());
-app.options('*', cors()); // Handle preflight requests
+    const hashed = await bcrypt.hash(password, 10);
+    const user_code = generateUserCode(first_name, last_name);
 
-// ✅ API Routes
-app.use('/api/clients', clientsRouter);     // e.g. /api/clients/:id
-app.use('/api/contacts', contactsRouter);   // e.g. /api/contacts?client_id=123
-app.use('/api/misc', miscRouter);           // e.g. /api/misc/all-contacts
-app.use('/api/auth', authRoutes);           // e.g. /api/auth/login
+    await db.query(
+      `INSERT INTO users (email, password, first_name, last_name, user_code, role, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, 1)`,
+      [email, hashed, first_name, last_name, user_code, role || 'admin']
+    );
 
-// ✅ Root health check
-app.get('/', (req, res) => {
-  res.send('🚀 MojKlijent API is running');
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+    console.error('❌ Signup error:', err);
+    res.status(500).json({ message: 'Internal server error during signup' });
+  }
 });
 
-// ✅ 404 Handler
-app.use((req, res) => {
-  res.status(404).json({ message: 'API route not found' });
+// ✅ Login Route
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+
+  try {
+    const [users] = await db.query(
+      'SELECT * FROM users WHERE email = ? AND is_active = 1',
+      [email]
+    );
+
+    const user = users[0];
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        user_code: user.user_code
+      }
+    });
+  } catch (err) {
+    console.error('❌ Login error:', err);
+    res.status(500).json({ message: 'Internal server error during login' });
+  }
 });
 
-// ✅ Global Error Handler
-app.use((err, req, res, next) => {
-  console.error('❌ Internal Server Error:', err);
-  res.status(500).json({ message: 'Internal server error' });
-});
-
-// ✅ Start the server
-app.listen(PORT, () => {
-  console.log(`✅ MojKlijent server running on port ${PORT}`);
-});
+module.exports = router;
