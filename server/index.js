@@ -13,7 +13,7 @@ const db = require('./db'); // make sure this path is correct
 const authRoutes = require('./routes/auth');
 const clientsRouter = require('./routes/clients');
 const contactsRouter = require('./routes/contacts');
-const miscRouter = require('./routes/misc');
+//const miscRouter = require('./routes/misc');
 
 // 🌍 MIDDLEWARE
 app.use(cors({
@@ -36,7 +36,7 @@ console.log('Registering route: /api/clients');
 app.use('/api/clients', clientsRouter);
 console.log('Registering route: /api/contacts');
 app.use('/api/contacts', contactsRouter);
-app.use('/api/misc', miscRouter);
+//app.use('/api/misc', miscRouter);
 
 // 🧪 Root endpoint for testing
 app.get('/', (req, res) => {
