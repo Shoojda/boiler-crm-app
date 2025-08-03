@@ -1,3 +1,5 @@
+console.log('🚀 Server starting...');
+
 // server/routes/auth.js
 const express = require('express');
 const router = express.Router();
@@ -92,5 +94,15 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Internal server error during login' });
   }
 });
+
+
+process.on('uncaughtException', (err) => {
+  console.error('🔥 Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔥 Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 
 module.exports = router;
