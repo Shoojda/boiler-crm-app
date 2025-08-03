@@ -1,3 +1,5 @@
+console.log('[AUTH] Middleware triggered. Headers:', JSON.stringify(req.headers, null, 2));
+
 // middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
