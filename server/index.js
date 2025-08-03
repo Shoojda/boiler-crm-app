@@ -27,9 +27,9 @@ app.options('*', cors()); // Handle preflight
 
 // 📦 API ROUTES
 app.use('/api/auth', authRoutes);
-app.use('/api/clients', clientsRouter);
-app.use('/api/contacts', contactsRouter);
-app.use('/api/misc', miscRouter);
+//app.use('/api/clients', clientsRouter);
+//app.use('/api/contacts', contactsRouter);
+//app.use('/api/misc', miscRouter);
 
 // 🧪 Root endpoint for testing
 app.get('/', (req, res) => {
