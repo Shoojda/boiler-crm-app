@@ -3,14 +3,34 @@ const jwt = require('jsonwebtoken');
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  if (!authHeader) {
+    console.log('[AUTH] No Authorization header');
+    return res.status(401).json({ error: 'Authorization header missing' });
+  }
 
-  if (!token) return res.status(401).json({ error: 'Token missing' });
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    console.log('[AUTH] Bearer token missing');
+    return res.status(401).json({ error: 'Token missing' });
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Invalid token' });
-
-    req.user = user; // user_id and user_code should be here
+    if (err) {
+      console.log('[AUTH] Invalid token:', err.message);
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    // Validate presence of user_id for all downstream handlers
+    if (!user.id && !user.user_id) {
+      console.log('[AUTH] Decoded token missing user id');
+      return res.status(403).json({ error: 'Token missing user id' });
+    }
+    // Normalize for downstream
+    req.user = {
+      user_id: user.id || user.user_id,
+      email: user.email,
+      role: user.role,
+      user_code: user.user_code
+    };
     next();
   });
 };

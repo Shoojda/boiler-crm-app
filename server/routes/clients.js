@@ -16,10 +16,17 @@ const formatDate = (dateStr) => {
   }
 };
 
+// Defensive helper for getting user id
+function getUserId(req) {
+  return req.user && (req.user.user_id || req.user.id);
+}
+
 // ✅ GET all active clients for a specific user
 router.get('/', authenticateToken, async (req, res) => {
-  const userId = req.user.user_id;
+  const userId = getUserId(req);
   const search = req.query.search || '';
+
+  if (!userId) return res.status(401).json({ error: 'User not authenticated' });
 
   try {
     const [results] = await db.query(
@@ -38,18 +45,19 @@ router.get('/', authenticateToken, async (req, res) => {
       `,
       [userId, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`]
     );
-
     res.json(results);
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Database error');
+    console.error('[GET /clients] DB error:', err);
+    res.status(500).json({ error: 'Database error' });
   }
 });
+
 // ✅ SEARCH clients
 router.get('/search', authenticateToken, async (req, res) => {
-  const userId = req.user.user_id;
+  const userId = getUserId(req);
   const query = req.query.query;
 
+  if (!userId) return res.status(401).json({ error: 'User not authenticated' });
   if (!query) return res.status(400).json({ error: 'Missing query' });
 
   try {
@@ -65,10 +73,9 @@ router.get('/search', authenticateToken, async (req, res) => {
       `,
       [userId, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery]
     );
-
     res.json(results);
   } catch (err) {
-    console.error('Search error:', err);
+    console.error('[SEARCH /clients] DB error:', err);
     res.status(500).json({ error: 'Database search error' });
   }
 });
@@ -76,33 +83,35 @@ router.get('/search', authenticateToken, async (req, res) => {
 // ✅ GET client by ID
 router.get('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const userId = req.user.user_id;
+  const userId = getUserId(req);
+
+  if (!userId) return res.status(401).json({ error: 'User not authenticated' });
 
   try {
     const [results] = await db.query(
       'SELECT * FROM clients WHERE id = ? AND user_id = ? AND is_deleted = 0',
       [id, userId]
     );
-
     if (results.length === 0) {
       return res.status(404).json({ error: 'Client not found or not authorized' });
     }
-
     res.json(results[0]);
   } catch (err) {
-    console.error(err);
+    console.error('[GET /clients/:id] DB error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
 // ✅ CREATE new client
 router.post('/', authenticateToken, async (req, res) => {
-  const userId = req.user.user_id;
+  const userId = getUserId(req);
   let {
     first_name, last_name, email, phone,
     address, boiler_make, boiler_model,
     install_date, next_service_date, notes
   } = req.body;
+
+  if (!userId) return res.status(401).json({ error: 'User not authenticated' });
 
   install_date = formatDate(install_date);
   next_service_date = formatDate(next_service_date);
@@ -125,10 +134,9 @@ router.post('/', authenticateToken, async (req, res) => {
         null, notes
       ]
     );
-
     res.status(201).json({ id: result.insertId, user_id: userId, ...req.body });
   } catch (err) {
-    console.error('POST /clients error:', err);
+    console.error('[POST /clients] DB error:', err);
     res.status(500).json({ error: 'Database insert error' });
   }
 });
@@ -140,9 +148,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
     address, boiler_make, boiler_model,
     install_date, next_service_date, notes
   } = req.body;
-
   const { id } = req.params;
-  const userId = req.user.user_id;
+  const userId = getUserId(req);
+
+  if (!userId) return res.status(401).json({ error: 'User not authenticated' });
 
   try {
     const [result] = await db.query(
@@ -160,14 +169,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
         id, userId
       ]
     );
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Client not found or unauthorized' });
     }
-
     res.json({ message: 'Client updated successfully' });
   } catch (err) {
-    console.error('PUT /clients/:id error:', err);
+    console.error('[PUT /clients/:id] DB error:', err);
     res.status(500).json({ error: 'Database update error' });
   }
 });
@@ -175,21 +182,21 @@ router.put('/:id', authenticateToken, async (req, res) => {
 // ✅ SOFT DELETE client
 router.delete('/:id', authenticateToken, async (req, res) => {
   const clientId = req.params.id;
-  const userId = req.user.user_id;
+  const userId = getUserId(req);
+
+  if (!userId) return res.status(401).json({ error: 'User not authenticated' });
 
   try {
     const [result] = await db.query(
       'UPDATE clients SET is_deleted = 1 WHERE id = ? AND user_id = ?',
       [clientId, userId]
     );
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Client not found or access denied' });
     }
-
     res.json({ success: true, message: 'Client soft-deleted' });
   } catch (err) {
-    console.error(err);
+    console.error('[DELETE /clients/:id] DB error:', err);
     res.status(500).json({ error: 'Database delete error' });
   }
 });
