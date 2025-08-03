@@ -1,3 +1,5 @@
+console.log('All routes are being registered!');
+
 // server/index.js
 require('dotenv').config();
 const express = require('express');
@@ -26,8 +28,13 @@ app.use(express.json());
 app.options('*', cors()); // Handle preflight
 
 // 📦 API ROUTES
+
+
+console.log('Registering route: /api/auth');
 app.use('/api/auth', authRoutes);
+console.log('Registering route: /api/clients');
 app.use('/api/clients', clientsRouter);
+console.log('Registering route: /api/contacts');
 app.use('/api/contacts', contactsRouter);
 app.use('/api/misc', miscRouter);
 
