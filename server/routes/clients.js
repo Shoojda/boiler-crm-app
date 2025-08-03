@@ -1,6 +1,6 @@
 // server/routes/clients.js
 const express = require('express');
-const db = require('../db');
+const db = require('./db');
 const { format } = require('date-fns');
 const authenticateToken = require('../middleware/authMiddleware');
 
