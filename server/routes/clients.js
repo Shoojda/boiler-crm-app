@@ -201,4 +201,49 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// ✅ ADD SERVICE ENTRY to a client's service history
+router.post('/:id/add-service', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const userId = getUserId(req);
+  const { notes, images = [] } = req.body;
+
+  if (!userId) return res.status(401).json({ error: 'User not authenticated' });
+
+  const now = new Date();
+  const serviceEntry = {
+    date: format(now, 'yyyy-MM-dd'),
+    datetime: now.toISOString(),
+    notes: notes || '',
+    images: Array.isArray(images) ? images : []
+  };
+
+  try {
+    const [rows] = await db.query(
+      'SELECT service_history FROM clients WHERE id = ? AND user_id = ? AND is_deleted = 0',
+      [id, userId]
+    );
+
+    if (rows.length === 0) return res.status(404).json({ error: 'Client not found or unauthorized' });
+
+    let history = [];
+    try {
+      history = JSON.parse(rows[0].service_history || '[]');
+      if (!Array.isArray(history)) history = [];
+    } catch {
+      history = [];
+    }
+
+    history.push(serviceEntry);
+
+    await db.query('UPDATE clients SET service_history = ? WHERE id = ?', [JSON.stringify(history), id]);
+
+    res.json({ success: true, new_entry: serviceEntry, service_history: history });
+  } catch (err) {
+    console.error('[POST /clients/:id/add-service] Error:', err);
+    res.status(500).json({ error: 'Database error adding service entry' });
+  }
+});
+
+
+
 module.exports = router;
