@@ -13,6 +13,7 @@ import PrivateRoute from './components/PrivateRoute';
 import MainLayout from './layout/MainLayout';
 import { LanguageProvider } from './contexts/LanguageContext'; // ✅ Import context
 import './App.css';
+import AddService from './pages/AddService';
 
 
 function AppRouter() {

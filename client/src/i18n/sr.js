@@ -1,0 +1,15 @@
+export default {
+  welcome: "Dobrodošli u MojKlijent",
+  chooseOption: "Molimo izaberite opciju:",
+  addClient: "➕ Dodaj klijenta",
+  viewClients: "📋 Prikaži klijente",
+  emailAutomation: "📨 Emailovi i Automatizacija",
+  login: "Prijava",
+  register: "Registracija",
+  loginBtn: "Prijavi se",
+  registerBtn: "Registruj se",
+  toggleTheme: "Promeni temu",
+  toggleLanguage: "English",
+  dontHaveAccount: "Nemate nalog?",
+  alreadyHaveAccount: "Već imate nalog?",
+};

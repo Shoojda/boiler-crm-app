@@ -3,6 +3,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { LanguageContext } from '../contexts/LanguageContext';
+import logo from '../assets/logo.svg'; // Adjust path if needed
 
 const fieldLabels = {
   en: {
@@ -19,7 +20,7 @@ const fieldLabels = {
     edit: 'Edit',
     save: 'Save',
     cancel: 'Cancel',
-    delete: 'Soft Delete',
+    delete: 'Delete',
     title: 'Client Details',
     prevServices: 'Service History',
     noServices: 'No service records yet.',
@@ -148,15 +149,39 @@ const ClientDetails = () => {
   if (!client) return null;
 
   return (
-    <div className="container" style={{ minHeight: '100vh', background: '#f7f7f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      
+      <div className="container" style={{
+      
+        minHeight: '100vh',
+        background: '#f7f7f7',
+        padding: '1rem',
+        boxSizing: 'border-box'
+      }}>
       <div className="card" style={{
+        
         borderRadius: 24,
         boxShadow: '0 2px 24px #0001',
         padding: '2.5rem 2rem',
         width: '100%',
-        maxWidth: 460,
+        maxWidth: '100%',
         background: '#fff'
       }}>
+        <img src={logo} alt="MojKlijent" className="logo" />
+        
+        <div style={{ marginBottom: 16 }}>
+          <Link to="/clients" className="btn-primary" style={{
+            fontWeight: 600,
+            fontSize: 14,
+            padding: '10px 14px',
+            borderRadius: 6,
+            display: 'inline-block',
+            textDecoration: 'none'
+          }}>
+            {t.back}
+          </Link>
+        </div>
+        
+
         <h1 style={{ fontWeight: 700, fontSize: 26, textAlign: 'center', marginBottom: 28 }}>{t.title}</h1>
 
         {fields.map(field => (
@@ -208,29 +233,56 @@ const ClientDetails = () => {
         <div style={{ margin: '2.5rem 0 1.25rem', borderBottom: '1px solid #eee' }} />
 
         <h3 style={{ fontWeight: 600, marginBottom: 8, fontSize: 18 }}>{t.prevServices}</h3>
-        <div style={{ color: '#666', fontSize: 15, marginBottom: 20 }}>{t.noServices}</div>
+        {Array.isArray(client.service_history) && client.service_history.length > 0 ? (
+          <div style={{ marginBottom: 24 }}>
+            {client.service_history.map((service, index) => (
+              <div
+                key={index}
+                style={{
+                  background: '#f9f9f9',
+                  border: '1px solid #ddd',
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 12
+                }}
+              >
+                <div style={{ fontSize: 14, marginBottom: 4 }}>
+                  <strong>Date:</strong> {service.date || 'N/A'}
+                </div>
+                <div style={{ fontSize: 14, marginBottom: 4 }}>
+                  <strong>Notes:</strong> {service.notes || 'N/A'}
+                </div>
+                {service.images && service.images.length > 0 && (
+                  <div style={{ fontSize: 14 }}>
+                    <strong>Images:</strong>
+                    <ul style={{ marginLeft: 16 }}>
+                      {service.images.map((img, i) => (
+                        <li key={i}>
+                          <a href={img} target="_blank" rel="noopener noreferrer">
+                            View Image {i + 1}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ color: '#666', fontSize: 15, marginBottom: 20 }}>{t.noServices}</div>
+        )}
 
         <Link to={`/client/${id}/add-service`} className="btn-primary" style={{
-          width: '100%',
-          marginBottom: 10,
-          fontWeight: 600,
-          fontSize: 16,
-          padding: '12px 0',
-          textAlign: 'center',
-          borderRadius: 8
-        }}>
+            fontWeight: 600,
+            fontSize: 14,
+            padding: '10px 14px',
+            borderRadius: 6,
+            display: 'inline-block',
+            textDecoration: 'none'
+          }}>
           ➕ Add Service
         </Link>
-
-        <Link to="/clients" className="btn-secondary" style={{
-          width: '100%',
-          marginBottom: 10,
-          fontWeight: 600,
-          fontSize: 16,
-          padding: '12px 0',
-          textAlign: 'center',
-          borderRadius: 8
-        }}>{t.back}</Link>
 
         <button onClick={handleSoftDelete} className="btn-secondary" style={{
           backgroundColor: '#ffdddd',
@@ -239,7 +291,8 @@ const ClientDetails = () => {
           fontWeight: 600,
           fontSize: 16,
           padding: '12px 0',
-          borderRadius: 8
+          borderRadius: 8,
+          textDecoration: 'none'
         }}>
           {t.delete}
         </button>

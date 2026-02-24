@@ -1,0 +1,15 @@
+export default {
+  welcome: "Welcome to MojKlijent",
+  chooseOption: "Please choose an option below:",
+  addClient: "➕ Add a Client",
+  viewClients: "📋 View Clients",
+  emailAutomation: "📨 Emails & Automation",
+  login: "Login",
+  register: "Register",
+  loginBtn: "Login",
+  registerBtn: "Register",
+  toggleTheme: "Toggle Theme",
+  toggleLanguage: "Српски",
+  dontHaveAccount: "Don’t have an account?",
+  alreadyHaveAccount: "Already have an account?",
+};
