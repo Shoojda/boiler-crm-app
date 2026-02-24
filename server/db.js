@@ -22,4 +22,6 @@ const pool = mysql.createPool({
   }
 })();
 
+console.log("DB host being used:", "127.0.0.1");
+
 module.exports = pool;
